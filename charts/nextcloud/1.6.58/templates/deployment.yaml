@@ -13,61 +13,6 @@ spec: {{ include "common.deployment.common_spec" . | nindent 2 }}
           env: {{ include "postgres.envVariableConfiguration" $postgres_values | nindent 10 }}
 
       containers:
-      {{ if eq (include "nginx.certAvailable" .) "true" }}
-      - name: nginx
-        {{ include "common.containers.imageConfig" .Values.nginx.image | nindent 8 }}
-        volumeMounts:
-          - name: nginx-configuration
-            mountPath: /etc/nginx/nginx.conf
-            subPath: nginx.conf
-          {{ include "nginx.tlsKeysVolumeMount" . | nindent 10 }}
-        ports:
-          - name: nginx-http
-            containerPort: 8000
-            protocol: TCP
-          - name: nginx-https
-            containerPort: {{ .Values.service.nodePort }}
-            protocol: TCP
-        livenessProbe:
-          httpGet:
-            scheme: HTTPS
-            path: /status.php
-            port: {{ .Values.service.nodePort }}
-            httpHeaders:
-            - name: Host
-              value: localhost
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 5
-          successThreshold: 1
-        readinessProbe:
-          httpGet:
-            scheme: HTTPS
-            path: /status.php
-            port: {{ .Values.service.nodePort }}
-            httpHeaders:
-            - name: Host
-              value: localhost
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          timeoutSeconds: 5
-          failureThreshold: 5
-          successThreshold: 2
-        startupProbe:
-          httpGet:
-            scheme: HTTPS
-            path: /status.php
-            port: {{ .Values.service.nodePort }}
-            httpHeaders:
-            - name: Host
-              value: localhost
-          initialDelaySeconds: 30
-          periodSeconds: 5
-          timeoutSeconds: 2
-          failureThreshold: 60
-          successThreshold: 1
-      {{ end }}
       - name: {{ .Chart.Name }}
           {{ include "common.resources.limitation" . | nindent 8 }}
         {{ include "common.containers.imageConfig" .Values.image | nindent 8 }}
@@ -80,18 +25,6 @@ spec: {{ include "common.deployment.common_spec" . | nindent 2 }}
         {{ $envList = mustAppend $envList (dict "name" "NEXTCLOUD_DATA_DIR" "value" .Values.nextcloud.datadir) }}
         {{ $envList = mustAppend $envList (dict "name" "PHP_UPLOAD_LIMIT" "value" (printf "%vG" (.Values.nextcloud.max_upload_size | default 3))) }}
         {{ $envList = mustAppend $envList (dict "name" "PHP_MEMORY_LIMIT" "value" (printf "%vM" (.Values.nextcloud.php_memory_limit | default 512))) }}
-        {{ if eq (include "nginx.certAvailable" .) "true" }}
-        {{ $envList = mustAppend $envList (dict "name" "APACHE_DISABLE_REWRITE_IP" "value" "1") }}
-          {{ if and .Values.nextcloud.host .Values.service.nodePort }}
-            {{ if .Values.nginxConfig.useDifferentAccessPort }}
-        {{ $envList = mustAppend $envList (dict "name" "OVERWRITEHOST" "value" .Values.nextcloud.host) }}
-            {{ else }}
-        {{ $envList = mustAppend $envList (dict "name" "OVERWRITEHOST" "value" (printf "%v:%v" .Values.nextcloud.host .Values.service.nodePort)) }}
-            {{ end }}
-          {{ end }}
-        {{ $envList = mustAppend $envList (dict "name" "OVERWRITEPROTOCOL" "value" "https") }}
-        {{ $envList = mustAppend $envList (dict "name" "TRUSTED_PROXIES" "value" "127.0.0.1") }}
-        {{ end }}
         {{ $hostName := .Values.nextcloud.host }}
         {{ if .Values.useServiceNameForHost }}
         {{ $hostName = (include "common.names.fullname" .) }}
@@ -222,11 +155,6 @@ spec: {{ include "common.deployment.common_spec" . | nindent 2 }}
           configMap:
             defaultMode: 0755
             name: "nextcloud-configuration"
-        - name: nginx-configuration
-          configMap:
-            defaultMode: 0700
-            name: "nginx-configuration"
-{{ include "nginx.tlsKeysVolume" . | nindent 8 }}
 {{ if .Values.appVolumeMounts }}
 {{ include "common.storage.configureAppVolumes" .Values | nindent 8 }}
 {{ end }}

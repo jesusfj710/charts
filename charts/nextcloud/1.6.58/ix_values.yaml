@@ -2,9 +2,4 @@ image:
   pullPolicy: IfNotPresent
   repository: nextcloud
   tag: 28.0.3
-nginx:
-  image:
-    pullPolicy: IfNotPresent
-    repository: nginx
-    tag: 1.23.3
 useServiceNameForHost: false

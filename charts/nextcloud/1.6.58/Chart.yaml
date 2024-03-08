@@ -2,7 +2,7 @@ name: nextcloud
 description: A file sharing server that puts the control and security of your own
   data back into your hands.
 annotations:
-  title: Nextcloud
+  title: Nextcloud-fork
 type: application
 version: 1.6.58
 apiVersion: v2

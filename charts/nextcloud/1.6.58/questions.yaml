@@ -22,7 +22,7 @@ groups:
 portals:
   web_portal:
     protocols:
-      - "$kubernetes-resource_configmap_nginx-configuration_protocol"
+      - "$variable-nextcloud.protocol"
     host:
       - "$variable-nextcloud.host"
     ports:
@@ -66,44 +66,6 @@ questions:
       $ref:
         - "definitions/certificate"
 
-  - variable: nginxConfig
-    description: "Configure Nginx for Nextcloud"
-    label: "Nginx Configuration"
-    group: "Nextcloud Configuration"
-    schema:
-      type: dict
-      show_if: [["certificate", "!=", null]]
-      attrs:
-        - variable: proxy_timeouts
-          label: "Proxy timeouts (Seconds)"
-          description: |
-            Applies the timeout to the following settings:</br>
-            - proxy_connect_timeout</br>
-            - proxy_send_timeout</br>
-            - proxy_read_timeout</br>
-          schema:
-            type: int
-            min: 30
-            default: 60
-            required: true
-        - variable: useDifferentAccessPort
-          label: "Use different port for URL rewrites"
-          description: |
-            If enabled, the URL rewrite will use [Access Port] defined below instead of the [Node Port].</br>
-            Note that Nextcloud will still listen on the [Node Port]. (Default 9001)
-          schema:
-            type: boolean
-            default: false
-        - variable: externalAccessPort
-          label: "External Access Port"
-          schema:
-            type: int
-            show_if: [["useDifferentAccessPort", "=", true]]
-            min: 443
-            max: 65535
-            default: 443
-            required: true
-
   - variable: nextcloud
     description: "Nextcloud configuration details"
     label: "Nextcloud Configuration"
@@ -120,6 +82,18 @@ questions:
             type: string
             $ref:
               - "definitions/nodeIP"
+        - variable: protocol
+          description: "Nextcloud protocol to create application URLs"
+          label: "Nextcloud protocol"
+          schema:
+            type: string
+            required: true
+            default: "http"
+            enum:
+              - value: "http"
+                description: "http"
+              - value: "https"
+                description: "https"
         - variable: username
           label: "Username"
           description: "Name of the Nextcloud admin user"
@@ -154,17 +128,6 @@ questions:
           schema:
             type: boolean
             default: false
-        - variable: max_upload_size
-          label: "Max Upload Size (Giga Bytes)"
-          description: |
-            Applies the timeout to the following settings:</br>
-            - client_max_body_size in nginx</br>
-            - post_max_size and upload_max_filesize in php</br>
-          schema:
-            type: int
-            default: 3
-            min: 1
-            required: true
         - variable: max_execution_time
           label: "Max Execution Time (Seconds)"
           description: "Configures the max execution time of php"
