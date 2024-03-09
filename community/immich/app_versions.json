@@ -6,10 +6,10 @@
         "location": "/__w/charts/charts/community/immich/3.0.14",
         "last_update": "2024-03-08 07:12:23",
         "required_features": [
-            "definitions/timezone",
             "definitions/gpuConfiguration",
-            "normalize/ixVolume",
-            "normalize/acl"
+            "normalize/acl",
+            "definitions/timezone",
+            "normalize/ixVolume"
         ],
         "human_version": "1.98.0_3.0.14",
         "version": "3.0.14",

@@ -4,10 +4,10 @@
         "supported": true,
         "healthy_error": null,
         "location": "/__w/charts/charts/charts/nextcloud/1.6.58",
-        "last_update": "2024-03-08 07:11:01",
+        "last_update": "2024-03-09 08:16:53",
         "required_features": [
-            "definitions/nodeIP",
             "definitions/certificate",
+            "definitions/nodeIP",
             "normalize/ixVolume"
         ],
         "human_version": "28.0.3_1.6.58",
@@ -16,7 +16,7 @@
             "name": "nextcloud",
             "description": "A file sharing server that puts the control and security of your own data back into your hands.",
             "annotations": {
-                "title": "Nextcloud"
+                "title": "Nextcloud-fork"
             },
             "type": "application",
             "version": "1.6.58",
@@ -67,71 +67,64 @@
                     "gid": 0,
                     "uid": 0,
                     "description": "Postgres runs as root user."
-                },
-                {
-                    "userName": "root",
-                    "groupName": "root",
-                    "gid": 0,
-                    "uid": 0,
-                    "description": "Nginx runs as root user. (Nginx only runs when certificate is provided)"
                 }
             ],
             "capabilities": [
                 {
                     "name": "CHOWN",
-                    "description": "Nextcloud, Nginx and Postgres are able to chown files."
+                    "description": "Nextcloud and Postgres are able to chown files."
                 },
                 {
                     "name": "FOWNER",
-                    "description": "Nextcloud, Nginx and Postgres are able to bypass permission checks for it's sub-processes."
+                    "description": "Nextcloud and Postgres are able to bypass permission checks for it's sub-processes."
                 },
                 {
                     "name": "SYS_CHROOT",
-                    "description": "Nextcloud, Nginx and Postgres are able to use chroot."
+                    "description": "Nextcloud and Postgres are able to use chroot."
                 },
                 {
                     "name": "MKNOD",
-                    "description": "Nextcloud, Nginx and Postgres are able to create device nodes."
+                    "description": "Nextcloud and Postgres are able to create device nodes."
                 },
                 {
                     "name": "DAC_OVERRIDE",
-                    "description": "Nextcloud, Nginx and Postgres are able to bypass permission checks."
+                    "description": "Nextcloud and Postgres are able to bypass permission checks."
                 },
                 {
                     "name": "FSETID",
-                    "description": "Nextcloud, Nginx and Postgres are able to set file capabilities."
+                    "description": "Nextcloud and Postgres are able to set file capabilities."
                 },
                 {
                     "name": "KILL",
-                    "description": "Nextcloud, Nginx and Postgres are able to kill processes."
+                    "description": "Nextcloud and Postgres are able to kill processes."
                 },
                 {
                     "name": "SETGID",
-                    "description": "Nextcloud, Nginx and Postgres are able to set group ID for it's sub-processes."
+                    "description": "Nextcloud and Postgres are able to set group ID for it's sub-processes."
                 },
                 {
                     "name": "SETUID",
-                    "description": "Nextcloud, Nginx and Postgres are able to set user ID for it's sub-processes."
+                    "description": "Nextcloud and Postgres are able to set user ID for it's sub-processes."
                 },
                 {
                     "name": "SETPCAP",
-                    "description": "Nextcloud, Nginx and Postgres are able to set process capabilities."
+                    "description": "Nextcloud and Postgres are able to set process capabilities."
                 },
                 {
                     "name": "NET_BIND_SERVICE",
-                    "description": "Nextcloud, Nginx and Postgres are able to bind to privileged ports."
+                    "description": "Nextcloud and Postgres are able to bind to privileged ports."
                 },
                 {
                     "name": "SETFCAP",
-                    "description": "Nextcloud, Nginx and Postgres are able to set file capabilities."
+                    "description": "Nextcloud and Postgres are able to set file capabilities."
                 },
                 {
                     "name": "NET_RAW",
-                    "description": "Nextcloud, Nginx and Postgres are able to use raw sockets."
+                    "description": "Nextcloud and Postgres are able to use raw sockets."
                 },
                 {
                     "name": "AUDIT_WRITE",
-                    "description": "Nextcloud, Nginx and Postgres are able to write to audit log."
+                    "description": "Nextcloud and Postgres are able to write to audit log."
                 }
             ],
             "hostMounts": []
@@ -178,7 +171,7 @@
             "portals": {
                 "web_portal": {
                     "protocols": [
-                        "$kubernetes-resource_configmap_nginx-configuration_protocol"
+                        "$variable-nextcloud.protocol"
                     ],
                     "host": [
                         "$variable-nextcloud.host"
@@ -254,62 +247,6 @@
                     }
                 },
                 {
-                    "variable": "nginxConfig",
-                    "description": "Configure Nginx for Nextcloud",
-                    "label": "Nginx Configuration",
-                    "group": "Nextcloud Configuration",
-                    "schema": {
-                        "type": "dict",
-                        "show_if": [
-                            [
-                                "certificate",
-                                "!=",
-                                null
-                            ]
-                        ],
-                        "attrs": [
-                            {
-                                "variable": "proxy_timeouts",
-                                "label": "Proxy timeouts (Seconds)",
-                                "description": "Applies the timeout to the following settings:</br>\n- proxy_connect_timeout</br>\n- proxy_send_timeout</br>\n- proxy_read_timeout</br>\n",
-                                "schema": {
-                                    "type": "int",
-                                    "min": 30,
-                                    "default": 60,
-                                    "required": true
-                                }
-                            },
-                            {
-                                "variable": "useDifferentAccessPort",
-                                "label": "Use different port for URL rewrites",
-                                "description": "If enabled, the URL rewrite will use [Access Port] defined below instead of the [Node Port].</br>\nNote that Nextcloud will still listen on the [Node Port]. (Default 9001)\n",
-                                "schema": {
-                                    "type": "boolean",
-                                    "default": false
-                                }
-                            },
-                            {
-                                "variable": "externalAccessPort",
-                                "label": "External Access Port",
-                                "schema": {
-                                    "type": "int",
-                                    "show_if": [
-                                        [
-                                            "useDifferentAccessPort",
-                                            "=",
-                                            true
-                                        ]
-                                    ],
-                                    "min": 443,
-                                    "max": 65535,
-                                    "default": 443,
-                                    "required": true
-                                }
-                            }
-                        ]
-                    }
-                },
-                {
                     "variable": "nextcloud",
                     "description": "Nextcloud configuration details",
                     "label": "Nextcloud Configuration",
@@ -329,6 +266,26 @@
                                         "definitions/nodeIP"
                                     ],
                                     "default": "192.168.0.10"
+                                }
+                            },
+                            {
+                                "variable": "protocol",
+                                "description": "Nextcloud protocol to create application URLs",
+                                "label": "Nextcloud protocol",
+                                "schema": {
+                                    "type": "string",
+                                    "required": true,
+                                    "default": "http",
+                                    "enum": [
+                                        {
+                                            "value": "http",
+                                            "description": "http"
+                                        },
+                                        {
+                                            "value": "https",
+                                            "description": "https"
+                                        }
+                                    ]
                                 }
                             },
                             {
@@ -378,17 +335,6 @@
                                 "schema": {
                                     "type": "boolean",
                                     "default": false
-                                }
-                            },
-                            {
-                                "variable": "max_upload_size",
-                                "label": "Max Upload Size (Giga Bytes)",
-                                "description": "Applies the timeout to the following settings:</br>\n- client_max_body_size in nginx</br>\n- post_max_size and upload_max_filesize in php</br>\n",
-                                "schema": {
-                                    "type": "int",
-                                    "default": 3,
-                                    "min": 1,
-                                    "required": true
                                 }
                             },
                             {
@@ -828,10 +774,10 @@
         "supported": true,
         "healthy_error": null,
         "location": "/__w/charts/charts/charts/nextcloud/1.6.53",
-        "last_update": "2024-03-08 07:11:01",
+        "last_update": "2023-11-29 13:01:06",
         "required_features": [
-            "definitions/nodeIP",
             "definitions/certificate",
+            "definitions/nodeIP",
             "normalize/ixVolume"
         ],
         "human_version": "27.1.4_1.6.53",
@@ -1652,10 +1598,10 @@
         "supported": true,
         "healthy_error": null,
         "location": "/__w/charts/charts/charts/nextcloud/1.6.29",
-        "last_update": "2024-03-08 07:11:01",
+        "last_update": "2023-10-06 13:44:43",
         "required_features": [
-            "definitions/nodeIP",
             "definitions/certificate",
+            "definitions/nodeIP",
             "normalize/ixVolume"
         ],
         "human_version": "26.0.2_1.6.29",
